@@ -1,0 +1,25 @@
+# systemd *user* unit for the laptop: the preferred backend, reached by the
+# failover Worker (deploy/router) as demo-gpu.aanandagiri.com.np (tunnel
+# laptop-demos, path ^/fly-heaven -> http://127.0.0.1:8935; its connector is
+# fly-chess's cloudflared-laptop.service). Runs straight from the repo checkout
+# at ~/Downloads/fly-haven, leaving 8934 for local runs. Install with:
+#   cp deploy/laptop/fly-heaven-laptop.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now fly-heaven-laptop
+[Unit]
+Description=Fly Heaven web app on 127.0.0.1:8935/fly-heaven
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/Downloads/fly-haven
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/Downloads/fly-haven/.venv/bin/python web/server/app.py --port 8935 --no-browser \
+  --base-path /fly-heaven --public-host demo-gpu.aanandagiri.com.np \
+  --public-origin https://demo.aanandagiri.com.np --idle-stop 120
+Restart=on-failure
+RestartSec=10
+# Shared with the desktop: four brains take ~1.4 GB running, up to ~3.6 GB loading at once.
+Nice=10
+MemoryMax=4G
+
+[Install]
+WantedBy=default.target

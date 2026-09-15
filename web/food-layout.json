@@ -1,0 +1,22 @@
+[
+  {"id":"berries","name":"Wild berries","model":null,"x":0.42,"y":0.51,"size":0.04,"radius":0.025,"height":0.029},
+  {"id":"apple-red","name":"Red apple","model":"apple_red","x":0.54,"y":0.58,"size":0.050,"radius":0.025,"height":0.050,"heading":0.4},
+  {"id":"banana","name":"Banana","model":"banana","x":0.68,"y":0.46,"size":0.080,"radius":0.042,"height":0.032,"heading":1.1},
+  {"id":"orange","name":"Orange","model":"orange","x":0.34,"y":0.42,"size":0.045,"radius":0.023,"height":0.041,"heading":0.0},
+  {"id":"melon","name":"Melon slice","model":"melon_slice","x":0.22,"y":0.61,"size":0.065,"radius":0.033,"height":0.039,"heading":-0.4},
+  {"id":"mango","name":"Mango slice","model":"mango","x":0.53,"y":0.31,"size":0.050,"radius":0.026,"height":0.036,"heading":0.7},
+  {"id":"apple-green","name":"Green apple","model":"apple_green","x":0.76,"y":0.62,"size":0.048,"radius":0.026,"height":0.050,"heading":-0.5},
+  {"id":"apple-red-2","name":"Red apple","model":"apple_red","x":0.13,"y":0.16,"size":0.044,"radius":0.022,"height":0.044,"heading":-0.2},
+  {"id":"orange-2","name":"Orange","model":"orange","x":0.29,"y":0.17,"size":0.040,"radius":0.020,"height":0.037,"heading":0.9},
+  {"id":"banana-2","name":"Banana","model":"banana","x":0.83,"y":0.18,"size":0.070,"radius":0.037,"height":0.012,"heading":-0.8},
+  {"id":"melon-2","name":"Melon slice","model":"melon_slice","x":0.96,"y":0.32,"size":0.055,"radius":0.029,"height":0.018,"heading":0.3},
+  {"id":"mango-2","name":"Mango slice","model":"mango","x":0.11,"y":0.42,"size":0.044,"radius":0.023,"height":0.032,"heading":-0.6},
+  {"id":"apple-green-2","name":"Green apple","model":"apple_green","x":0.91,"y":0.53,"size":0.043,"radius":0.022,"height":0.043,"heading":1.1},
+  {"id":"apple-red-3","name":"Red apple","model":"apple_red","x":0.27,"y":0.72,"size":0.046,"radius":0.023,"height":0.046,"heading":0.1},
+  {"id":"orange-3","name":"Orange","model":"orange","x":0.49,"y":0.72,"size":0.041,"radius":0.021,"height":0.038,"heading":-0.5},
+  {"id":"banana-3","name":"Banana","model":"banana","x":0.84,"y":0.70,"size":0.072,"radius":0.038,"height":0.012,"heading":0.5},
+  {"id":"melon-3","name":"Melon slice","model":"melon_slice","x":0.64,"y":0.13,"size":0.056,"radius":0.030,"height":0.018,"heading":-0.9},
+  {"id":"mango-3","name":"Mango slice","model":"mango","x":0.08,"y":0.67,"size":0.043,"radius":0.022,"height":0.031,"heading":0.8},
+  {"id":"apple-green-3","name":"Green apple","model":"apple_green","x":1.02,"y":0.72,"size":0.042,"radius":0.021,"height":0.042,"heading":-0.2},
+  {"id":"orange-4","name":"Orange","model":"orange","x":1.06,"y":0.42,"size":0.040,"radius":0.020,"height":0.037,"heading":0.6}
+]

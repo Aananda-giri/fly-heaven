@@ -1,0 +1,16 @@
+// Failover router for https://demo.aanandagiri.com.np/fly-heaven — see src/index.js.
+// Deploy (the token lives in the repo .env):
+//   cd deploy/router && CLOUDFLARE_API_TOKEN="$(grep '^CLOUDFLARE_API_TOKEN=' ../../.env | cut -d= -f2-)" wrangler deploy
+{
+  "name": "fly-heaven-router",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+  "account_id": "90d98753cb10655a4c01223b5dd43db3",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "demo.aanandagiri.com.np/fly-heaven*", "zone_name": "aanandagiri.com.np" }
+  ],
+  // A watching page polls several times a second; failovers are logged either way.
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 }
+}

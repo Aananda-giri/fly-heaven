@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Fly pose preview</title>
+<style>body{margin:0;background:#263128;color:#eee;font:14px system-ui}nav{position:absolute;top:16px;left:16px;display:flex;gap:12px}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"../vendor/three.module.js"}}</script></head>
+<body><nav><label>Pose <select id="pose"><option>feed</option><option>bask</option><option>bask_belly_up</option><option>groom</option><option>sing</option><option>mate</option><option>walk</option><option>flight</option></select></label><span>drag to orbit · scroll to zoom</span></nav>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
+import { DRACOLoader } from '../vendor/loaders/DRACOLoader.js';
+import { clone } from '../vendor/utils/SkeletonUtils.js';
+import { OrbitControls } from '../vendor/OrbitControls.js';
+import { FlyRig } from '../fly.js';
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(1);renderer.setClearColor(0x263128);
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;
+document.body.append(renderer.domElement);
+const scene=new THREE.Scene();scene.add(new THREE.HemisphereLight(0xffffff,0x655b46,2));
+const sun=new THREE.DirectionalLight(0xffe4c4,3);sun.position.set(.03,.08,.06);scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(.3,.3),new THREE.MeshStandardMaterial({color:0x80745b,roughness:1}));ground.rotation.x=-Math.PI/2;scene.add(ground);
+const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.0005,2);camera.position.set(.04,.026,-.035);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.005,0);controls.update();
+const loader=new GLTFLoader(),draco=new DRACOLoader();draco.setDecoderPath('../vendor/');loader.setDRACOLoader(draco);
+const gltf=await loader.loadAsync('../assets/housefly.glb');
+const male=new FlyRig(clone(gltf.scene));const female=new FlyRig(clone(gltf.scene),{scale:1.08});scene.add(male.object,female.object);
+const fruit=new THREE.Mesh(new THREE.SphereGeometry(.016,32,20),new THREE.MeshStandardMaterial({color:0xb3272a,roughness:.4}));fruit.position.set(0,.011,.024);scene.add(fruit);
+const select=document.querySelector('select');let tick=0;
+function pose(){const mating=select.value==='mate';fruit.visible=select.value==='feed';female.object.visible=mating;male.setTarget({x:0,z:mating?-.006:0,height:mating?.0055:.0002,heading:0,pose:select.value,tick:tick++});if(mating)female.setTarget({x:0,z:0,height:.0002,heading:0,pose:'bask',tick:tick++});}
+select.addEventListener('change',pose);pose();
+window.preview={male,female,scene,renderer,camera,setPose(name){select.value=name;pose();},advance(seconds){for(let i=0;i<seconds*60;i++){male.update(1/60,i/60);if(female.object.visible)female.update(1/60,i/60);}renderer.render(scene,camera);}};
+const clock=new THREE.Clock();renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;male.update(dt,t);if(female.object.visible)female.update(dt,t);controls.update();renderer.render(scene,camera);});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>

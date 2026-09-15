@@ -6,6 +6,8 @@ __pycache__/
 /data-v2/
 /runs/
 /assets/
+/web/assets/blenderkit-housefly/source.blend
+/web/assets/housefly*.glb
 Untitled.blend
 nbexec-full.log
 nbexec-full-v2*.log
@@ -14,3 +16,7 @@ runs-*.log
 launch_pilot.sh
 watch_pilot.sh
 **.env
+.wrangler/
+/web/assets/brain-atlas/
+/web/assets/food-pack.glb
+/web/assets/food-pack.json

@@ -1,0 +1,25 @@
+# systemd *user* unit (no sudo needed; survives logout/reboot with linger on).
+# Installed to ~/.config/systemd/user/ on lucy by scripts/deploy_home_server.sh.
+# lucy is the fallback: deploy/router sends a page here only while the laptop is
+# unavailable. Routes (demo-cpu.aanandagiri.com.np, path ^/fly-heaven ->
+# http://127.0.0.1:8934) are configured on tunnel lucy-demos, not here.
+[Unit]
+Description=Fly Heaven web app on 127.0.0.1:8934/fly-heaven
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/fly-heaven
+Environment=PYTHONUNBUFFERED=1
+# 4 cores and 3.8 GB, shared with fly-chess and a desktop. A brain takes a core
+# and ~0.35 GB running, ~0.9 GB while loading: one fly at a time.
+ExecStart=%h/fly-heaven/.venv/bin/python web/server/app.py --port 8934 --no-browser \
+  --base-path /fly-heaven --public-host demo-cpu.aanandagiri.com.np \
+  --public-origin https://demo.aanandagiri.com.np --max-flies 1 --idle-stop 120
+Restart=on-failure
+RestartSec=10
+Nice=10
+# Brains included: past this the kernel kills a brain here rather than fly-chess.
+MemoryMax=1200M
+
+[Install]
+WantedBy=default.target

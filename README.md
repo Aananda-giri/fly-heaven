@@ -22,6 +22,12 @@ annotated cell-type readouts; the environment, navigation, female agent and
 visible poses are presentation or scripted world mechanics. See the continuous
 film instructions below for the current asset and rendering pipeline.
 
+**[`web/`](web/)** is a Three.js alternative to the Blender render pipeline
+below: the same rigged BlenderKit housefly on a macro forest floor built in
+code, where each fly is driven live by its own instance of the full connectome
+(`web/server/fly_worker.py`) — see [`web/README.md`](web/README.md).
+Live demo: https://demo.aanandagiri.com.np/fly-heaven/
+
 The simulation can still be reproduced with `uv run python -m heaven.calibrate`
 and `uv run python -m heaven.simulate --seconds 220 --out runs/fly-heaven/day1`.
 Export a timeline for Blender using `uv run python -m heaven.blender.export_timeline`

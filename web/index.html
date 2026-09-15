@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fly Haven</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><text y=%2213%22 font-size=%2214%22>🪰</text></svg>" />
+<style>
+  html, body { margin: 0; height: 100%; background: #0c130d; overflow: hidden; }
+  canvas { display: block; touch-action: none; }
+  #hud {
+    position: fixed; left: 14px; bottom: 12px; z-index: 2;
+    font: 12px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #d9e8d2; text-shadow: 0 1px 3px rgba(0,0,0,.6);
+    pointer-events: none; opacity: .85;
+  }
+  #hud b { color: #fff; }
+  #panel {
+    position: fixed; top: 12px; right: 12px; z-index: 2; width: 210px;
+    font: 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #e7f1de; background: rgba(12, 19, 13, 0.72); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px;
+  }
+  #panel h1 { font-size: 12px; margin: 0 0 8px; letter-spacing: .04em; text-transform: uppercase; color: #a9cf8f; }
+  .speed-control { display: flex; align-items: center; gap: 7px; margin: 8px 0 10px; color: #cddfc2; font-size: 10px; }
+  .speed-control input { flex: 1; accent-color: #8fce6a; }
+  .speed-control output { min-width: 35px; text-align: right; color: #fff; font-weight: 600; }
+  #flyRow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .fly-toggle { display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; color: #cddfc2; }
+  .fly-toggle input { width: 16px; height: 16px; accent-color: #8fce6a; cursor: pointer; }
+  .fly-toggle input:disabled { cursor: not-allowed; opacity: .35; }
+  #status { font-size: 11px; color: #cddfc2; margin-bottom: 10px; min-height: 15px; }
+  #status .pose { color: #fff; font-weight: 600; }
+  .dopamine-label { display: flex; justify-content: space-between; font-size: 10px; color: #a9cf8f; margin-bottom: 4px; }
+  .dopamine-bar { height: 8px; border-radius: 5px; background: rgba(255,255,255,0.1); overflow: hidden; }
+  .dopamine-fill {
+    height: 100%; width: 0%; border-radius: 5px;
+    background: linear-gradient(90deg, #ffb84d, #ff6b6b);
+    box-shadow: 0 0 10px 1px rgba(255, 140, 80, 0.6);
+    transition: width .15s ease-out, box-shadow .15s ease-out;
+  }
+  #brain {
+    position: fixed; bottom: 12px; right: 12px; z-index: 2; width: 350px; max-height: calc(100dvh - 205px); overflow-y: auto;
+    font: 11px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #e7f1de; background: rgba(12, 19, 13, 0.72); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 12px;
+  }
+  #brain h1 { font-size: 12px; margin: 0 0 8px; letter-spacing: .04em; text-transform: uppercase; color: #a9cf8f; }
+  #brainCanvas { width: 100%; height: 72px; display: block; border-radius: 6px; background: rgba(0,0,0,.28); }
+  #brainLegend { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 8px; }
+  .brain-chip { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #cddfc2; }
+  .brain-swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .brain-chip b { color: #fff; font-weight: 600; margin-left: 2px; }
+
+  #brain .brain-heading {display:flex;align-items:center;justify-content:space-between;gap:8px}
+  #brain .brain-heading h1 {margin:0}
+  #brain button, #brain select {font:inherit;color:#dcecf4;background:#172c34;border:1px solid #36515a;border-radius:5px;padding:4px 6px;cursor:pointer}
+  #brain button:focus-visible, #brain select:focus-visible {outline:2px solid #55c8f5;outline-offset:2px}
+  #brainStatus {display:block;color:#72d8f1;font-size:10px;margin:6px 0}
+  .brain-controls {display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  #brainView {height:220px;width:100%;border:1px solid #24424d;border-radius:7px;overflow:hidden;background:#06131a}
+  #brainView canvas {width:100%;height:100%}
+  #brainCoverage, .brain-note {color:#9db2b8;font-size:10px;margin:6px 0}
+  .brain-note a {color:#72d8f1}
+  #brainRegions {display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0}
+  #brain .brain-region {display:flex;align-items:center;justify-content:space-between;gap:5px;text-align:left;border-left:3px solid var(--region-color);font-size:10px;box-shadow:inset 0 0 calc(var(--activity,0) * 20px) color-mix(in srgb,var(--region-color) 25%,transparent)}
+  #brain .brain-region b {font-size:9px;font-weight:400;color:var(--region-color);white-space:nowrap}
+  #brain .brain-region[aria-pressed=true] {background:#26434e;outline:1px solid var(--region-color)}
+  #brain details {margin-top:8px} #brain summary {cursor:pointer;color:#a9cf8f;margin-bottom:6px}
+  #brain.expanded {inset:16px;z-index:5;width:auto;max-height:none;padding:16px 22px;background:rgba(6,16,22,.97)}
+  #brain.expanded #brainView {height:calc(100dvh - 280px);min-height:220px}
+  #brain.expanded #brainRegions {grid-template-columns:repeat(4,1fr)}
+  @media(max-width:600px){#brain{width:min(350px,calc(100vw - 48px));max-height:45dvh}#brain.expanded{inset:8px;padding:12px}#brain.expanded #brainRegions{grid-template-columns:1fr 1fr}#brain.expanded #brainView{height:calc(100dvh - 345px)}}
+  #loading {
+    position: fixed; inset: 0; z-index: 3;
+    display: flex; align-items: center; justify-content: center;
+    background: #0c130d; color: #cfe0c6;
+    font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition: opacity .4s ease;
+  }
+  #loading.hidden { opacity: 0; pointer-events: none; }
+</style>
+<script type="importmap">
+  { "imports": { "three": "./vendor/three.module.js" } }
+</script>
+</head>
+<body>
+  <div id="loading">connecting to the brain server&hellip;</div>
+  <div id="hud"><b>Fly Haven</b> &middot; drag to orbit &middot; scroll to zoom</div>
+  <div id="panel">
+    <h1>Flies</h1>
+    <div id="flyRow"></div>
+    <label class="speed-control" for="speedControl"><span>flight speed</span><input id="speedControl" type="range" min="0.25" max="3" step="0.25" value="1"><output id="speedValue">1×</output></label>
+    <div id="status">connecting&hellip;</div>
+    <div class="dopamine-label"><span>dopamine (PAM11)</span><span id="dopamineValue">0 Hz</span></div>
+    <div class="dopamine-bar"><div class="dopamine-fill" id="dopamineFill"></div></div>
+  </div>
+  <div id="brain">
+    <div class="brain-heading"><h1 id="brainTitle">Brain activity</h1><button id="brainExpand" type="button" aria-expanded="false">Expand</button></div>
+    <span id="brainStatus" role="status">Loading anatomy…</span>
+    <div class="brain-controls">
+      <select id="brainFly" aria-label="Follow fly brain"><option value="">No fly selected</option></select>
+      <select id="brainScope" aria-label="Anatomy view"><option value="brain">Brain</option><option value="cns">Brain + nerve cord</option></select>
+      <select id="brainCircuit" aria-label="Highlight circuit"><option value="">All activity</option></select>
+      <label><input id="brainScan" type="checkbox" checked> Scan</label>
+    </div>
+    <div id="brainView"></div>
+    <p id="brainCoverage"></p>
+    <p id="brainFocus" class="brain-note">Activity across all visible neurons</p>
+    <div id="brainRegions" aria-label="Neuron groups"></div>
+    <p class="brain-note">Drag to rotate · scroll to zoom. <a href="https://male-cns.janelia.org/download/" target="_blank" rel="noreferrer">MaleCNS v1.0</a> soma atlas, simulated activity. Glow fades between ticks; scan sweep is visual.</p>
+    <details><summary>Activity traces</summary><canvas id="brainCanvas" width="640" height="140"></canvas><div id="brainLegend"></div></details>
+  </div>
+  <script>
+    addEventListener("error", (e) => {
+      const el = document.getElementById("loading");
+      el.textContent = "ERR: " + (e.error && e.error.stack || e.message);
+      el.style.whiteSpace = "pre-wrap"; el.style.textAlign = "left"; el.style.padding = "20px";
+    });
+    addEventListener("unhandledrejection", (e) => {
+      const el = document.getElementById("loading");
+      el.textContent = "REJ: " + (e.reason && e.reason.stack || e.reason);
+      el.style.whiteSpace = "pre-wrap"; el.style.textAlign = "left"; el.style.padding = "20px";
+    });
+  </script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
