@@ -163,7 +163,14 @@ class Handler(SimpleHTTPRequestHandler):
         origins = {f"http://{h}" for h in local} | {f"https://{h}" for h in self.public_hosts} | self.public_origins
         host = self.headers.get("Host", "")
         origin = self.headers.get("Origin")
-        return host in (local | self.public_hosts) and (origin is None or origin in origins) and self.headers.get("Sec-Fetch-Site") != "cross-site"
+        # A page load is cross-site whenever it's reached via a link on another
+        # site (sharing it anywhere makes every visit "cross-site"); only reject
+        # cross-site for non-navigations, i.e. a third-party page's script
+        # calling our API rather than a person just following the link.
+        navigation = self.headers.get("Sec-Fetch-Mode") == "navigate" and self.headers.get("Sec-Fetch-Dest") == "document"
+        return (host in (local | self.public_hosts)
+                and (origin is None or origin in origins)
+                and (navigation or self.headers.get("Sec-Fetch-Site") != "cross-site"))
 
     def app_path(self):
         """The request path below base_path, or None when it's outside it."""

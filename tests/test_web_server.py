@@ -61,6 +61,19 @@ def test_only_listed_hosts_and_origins_reach_the_api(public_server):
         assert response.status == 201 and json.loads(body) == {"id": "f1"}
 
 
+def test_a_shared_link_still_loads_when_followed_from_another_site(public_server):
+    # Sec-Fetch-Site is "cross-site" for any page reached via a link on another
+    # site (that's how sharing a link normally looks), but a real page load is
+    # still a navigation, distinct from a third-party script calling the API.
+    navigation = {"Sec-Fetch-Site": "cross-site", "Sec-Fetch-Mode": "navigate", "Sec-Fetch-Dest": "document"}
+    response, _ = request(public_server, "GET", "/fly-heaven/", **navigation)
+    assert response.status == 200
+
+    cross_site_fetch = {"Sec-Fetch-Site": "cross-site", "Sec-Fetch-Mode": "cors", "Sec-Fetch-Dest": "empty"}
+    response, _ = request(public_server, "GET", "/fly-heaven/api/flies", **cross_site_fetch)
+    assert response.status == 403
+
+
 @pytest.mark.parametrize("path", [
     "/fly-heaven/server/app.py",
     "/fly-heaven/%73erver/app.py",
